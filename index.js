@@ -23,6 +23,28 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run() {
     try {
 
+        const laptopCategoryCollection = client.db('resaleShop').collection('laptopCategories');
+        const laptopsCollection = client.db('resaleShop').collection('laptops');
+
+        // API for laptop category/brand
+        app.get('/category', async (req, res) => {
+            const query = {};
+            const categories = await laptopCategoryCollection.find(query).toArray();
+
+            res.send(categories);
+        });
+
+        // API for category/brand wise laptops
+        app.get('/category/:brand', async (req, res) => {
+            const brand = req.params.brand;
+            // console.log(brand);
+
+            const query = { brand: brand }
+            const laptops = await laptopsCollection.find(query).toArray();
+
+            res.send(laptops);
+        })
+
     }
     finally {
 

@@ -25,6 +25,8 @@ async function run() {
 
         const laptopCategoryCollection = client.db('resaleShop').collection('laptopCategories');
         const laptopsCollection = client.db('resaleShop').collection('laptops');
+        const usersCollection = client.db('resaleShop').collection('users');
+        const bookingsCollection = client.db('resaleShop').collection('bookings');
 
         // API for laptop category/brand
         app.get('/category', async (req, res) => {
@@ -43,6 +45,37 @@ async function run() {
             const laptops = await laptopsCollection.find(query).toArray();
 
             res.send(laptops);
+        });
+
+        //API for getting user according to their role
+        app.get('/user/role/:email', async (req, res) => {
+            const email = req.params.email;
+
+            const query = { email };
+
+            const user = await usersCollection.findOne(query);
+
+            res.send(user);
+        })
+
+        // API for save user info
+        app.post('/user', async (req, res) => {
+            const user = req.body;
+            // console.log(user);
+
+            const result = await usersCollection.insertOne(user);
+
+            res.send(result);
+        });
+
+        // API for save booking info
+        app.post('/booking', async (req, res) => {
+            const booking = req.body;
+            // console.log(booking);
+
+            const result = await bookingsCollection.insertOne(booking);
+
+            res.send(result);
         })
 
     }

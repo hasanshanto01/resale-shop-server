@@ -48,7 +48,7 @@ async function run() {
         });
 
         //API for getting user according to their role
-        app.get('/user/role/:email', async (req, res) => {
+        app.get('/users/role/:email', async (req, res) => {
             const email = req.params.email;
 
             const query = { email };
@@ -56,10 +56,10 @@ async function run() {
             const user = await usersCollection.findOne(query);
 
             res.send(user);
-        })
+        });
 
         // API for save user info
-        app.post('/user', async (req, res) => {
+        app.post('/users', async (req, res) => {
             const user = req.body;
             // console.log(user);
 
@@ -69,24 +69,36 @@ async function run() {
         });
 
         // API for save booking info
-        app.post('/booking', async (req, res) => {
+        app.post('/bookings', async (req, res) => {
             const booking = req.body;
             // console.log(booking);
 
             const result = await bookingsCollection.insertOne(booking);
 
             res.send(result);
-        })
+        });
+
+        // API for getting laptops based on seller
+        app.get('/laptops', async (req, res) => {
+            const email = req.query.email;
+            // console.log(email);
+
+            const query = { sellerEmail: email }
+
+            const result = await laptopsCollection.find(query).toArray();
+
+            res.send(result);
+        });
 
         // API for save product/laptop info
-        app.post('/laptop', async (req, res) => {
+        app.post('/laptops', async (req, res) => {
             const product = req.body;
             // console.log(product);
 
             const result = await laptopsCollection.insertOne(product);
 
             res.send(result);
-        })
+        });
 
     }
     finally {

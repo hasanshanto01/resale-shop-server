@@ -47,7 +47,7 @@ async function run() {
             res.send(laptops);
         });
 
-        //API for getting user according to their role
+        //API for getting user role
         app.get('/users/role/:email', async (req, res) => {
             const email = req.params.email;
 
@@ -57,6 +57,18 @@ async function run() {
 
             res.send(user);
         });
+
+        // API for getting users according their role
+        app.get('/users', async (req, res) => {
+            const role = req.query.role;
+            // console.log(role);
+
+            const query = { role: role };
+
+            const result = await usersCollection.find(query).toArray();
+
+            res.send(result);
+        })
 
         // API for save user info
         app.post('/users', async (req, res) => {
@@ -71,6 +83,7 @@ async function run() {
         // API for getting booking info
         app.get('/bookings', async (req, res) => {
             const email = req.query.email;
+            // console.log(email);
 
             const query = { email: email };
 

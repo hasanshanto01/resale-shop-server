@@ -78,6 +78,16 @@ async function run() {
             res.send(result);
         })
 
+        // API for save product/laptop info
+        app.post('/laptop', async (req, res) => {
+            const product = req.body;
+            // console.log(product);
+
+            const result = await laptopsCollection.insertOne(product);
+
+            res.send(result);
+        })
+
     }
     finally {
 

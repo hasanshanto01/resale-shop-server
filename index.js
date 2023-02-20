@@ -55,7 +55,7 @@ async function run() {
             // console.log(bookedLaptop);
 
             const price = bookedLaptop.price;
-            // const priceInFDollar = price * 105;
+
             const amount = price * 100; //in cents
 
             const paymentIntent = await stripe.paymentIntents.create({
@@ -138,6 +138,61 @@ async function run() {
             res.send(result);
         });
 
+        // API for user(seller) verification update
+        app.patch('/users/:id', async (req, res) => {
+            const id = req.params.id;
+            // console.log(id);
+
+            const query = {
+                _id: new ObjectId(id)
+            };
+
+            const options = { upsert: true };
+
+            // *User / seller update*
+            const updatedDoc = {
+                $set: {
+                    verified: true
+                }
+            };
+
+            const result = await usersCollection.updateOne(query, updatedDoc, options);
+
+            // *seller verification update in laptops/products*
+            const email = req.body.email;
+            // console.log(email);
+
+            const filter = {
+                sellerEmail: email
+            };
+
+            const updatedLaptopDoc = {
+                $set: {
+                    verified: true
+                }
+            };
+
+            const updatedLaptop = await laptopsCollection.updateOne(filter, updatedLaptopDoc, options);
+
+            res.send(result);
+
+        });
+
+        // API for user delete
+        app.delete('/users/:id', async (req, res) => {
+            const id = req.params.id;
+            // console.log(id);
+
+            const query = {
+                _id: new ObjectId(id)
+            };
+
+            const result = await usersCollection.deleteOne(query);
+
+            res.send(result);
+
+        });
+
         // API for getting booking info
         app.get('/bookings', async (req, res) => {
             const email = req.query.email;
@@ -165,7 +220,7 @@ async function run() {
         // API for getting seller based buyer detail from booking
         app.get('/buyers', async (req, res) => {
             const email = req.query.email;
-            console.log(email);
+            // console.log(email);
 
             const query = {
                 sellerEmail: email

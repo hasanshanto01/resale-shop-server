@@ -75,7 +75,7 @@ async function run() {
         // API for save payment info
         app.post('/payments', async (req, res) => {
             const payment = req.body;
-            console.log(payment);
+            // console.log(payment);
 
             const result = await paymentsCollection.insertOne(payment);
 
@@ -153,13 +153,28 @@ async function run() {
         // API for specific booking
         app.get('/bookings/:id', async (req, res) => {
             const bookingId = req.params.id;
-            console.log(bookingId);
+            // console.log(bookingId);
 
             const query = { _id: new ObjectId(bookingId) };
 
             const result = await bookingsCollection.findOne(query);
 
             res.send(result);
+        })
+
+        // API for getting seller based buyer detail from booking
+        app.get('/buyers', async (req, res) => {
+            const email = req.query.email;
+            console.log(email);
+
+            const query = {
+                sellerEmail: email
+            };
+
+            const result = await bookingsCollection.find(query).toArray();
+
+            res.send(result);
+
         })
 
         // API for save booking info
@@ -184,6 +199,20 @@ async function run() {
             res.send(result);
         });
 
+        // API for advertised product
+        app.get('/laptops/advertised', async (req, res) => {
+
+            const query = {
+                advertisement: true,
+                status: 'Available'
+            }
+
+            const result = await laptopsCollection.find(query).toArray();
+
+            res.send(result);
+
+        });
+
         // API for save product/laptop info
         app.post('/laptops', async (req, res) => {
             const product = req.body;
@@ -192,6 +221,40 @@ async function run() {
             const result = await laptopsCollection.insertOne(product);
 
             res.send(result);
+        });
+
+        // API for updated laptop/product advertisement
+        app.patch('/laptops/:id', async (req, res) => {
+            const productId = req.params.id;
+
+            const query = { _id: new ObjectId(productId) };
+
+            const options = { upsert: true };
+
+            const updatedDoc = {
+                $set: {
+                    advertisement: true
+                }
+            };
+
+            const result = await laptopsCollection.updateOne(query, updatedDoc, options);
+
+            res.send(result);
+        });
+
+        // API for product/laptop delete
+        app.delete('/laptops/:id', async (req, res) => {
+            const id = req.params.id;
+            // console.log(id);
+
+            const query = {
+                _id: new ObjectId(id)
+            };
+
+            const result = await laptopsCollection.deleteOne(query);
+
+            res.send(result);
+
         });
 
     }

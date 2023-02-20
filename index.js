@@ -1,8 +1,9 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 
+const stripe = require("stripe")(process.env.STRIPE_SK);
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -27,6 +28,7 @@ async function run() {
         const laptopsCollection = client.db('resaleShop').collection('laptops');
         const usersCollection = client.db('resaleShop').collection('users');
         const bookingsCollection = client.db('resaleShop').collection('bookings');
+        const paymentsCollection = client.db('resaleShop').collection('payments');
 
         // API for laptop category/brand
         app.get('/category', async (req, res) => {
@@ -45,6 +47,62 @@ async function run() {
             const laptops = await laptopsCollection.find(query).toArray();
 
             res.send(laptops);
+        });
+
+        // payment-intent
+        app.post('/create-payment-intent', async (req, res) => {
+            const bookedLaptop = req.body;
+            // console.log(bookedLaptop);
+
+            const price = bookedLaptop.price;
+            // const priceInFDollar = price * 105;
+            const amount = price * 100; //in cents
+
+            const paymentIntent = await stripe.paymentIntents.create({
+                currency: "usd",
+                amount: amount,
+                "payment_method_types": [
+                    "card"
+                ],
+            });
+
+            res.send({
+                clientSecret: paymentIntent.client_secret,
+            });
+
+        });
+
+        // API for save payment info
+        app.post('/payments', async (req, res) => {
+            const payment = req.body;
+            console.log(payment);
+
+            const result = await paymentsCollection.insertOne(payment);
+
+            //For booking update
+            const bookingId = payment.bookingId;
+            const filter = { _id: new ObjectId(bookingId) };
+            const updatedBookingDoc = {
+                $set: {
+                    paid: true,
+                    transactionId: payment.transactionId
+                }
+            }
+            const updatedBookingResult = await bookingsCollection.updateOne(filter, updatedBookingDoc);
+
+            //For product/laptop update
+            const productId = payment.productId;
+            const query = { _id: new ObjectId(productId) };
+            const updatedProductDoc = {
+                $set: {
+                    status: 'Sold'
+                }
+            }
+            const updatedProductResult = await laptopsCollection.updateOne(query, updatedProductDoc);
+
+
+            res.send(result);
+
         });
 
         //API for getting user role
@@ -91,6 +149,18 @@ async function run() {
 
             res.send(bookings);
         });
+
+        // API for specific booking
+        app.get('/bookings/:id', async (req, res) => {
+            const bookingId = req.params.id;
+            console.log(bookingId);
+
+            const query = { _id: new ObjectId(bookingId) };
+
+            const result = await bookingsCollection.findOne(query);
+
+            res.send(result);
+        })
 
         // API for save booking info
         app.post('/bookings', async (req, res) => {

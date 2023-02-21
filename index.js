@@ -318,7 +318,7 @@ async function run() {
         // API for getting wishlist product based on user
         app.get('/wishlists', async (req, res) => {
             const email = req.query.email;
-            console.log(email);
+            // console.log(email);
 
             const query = {
                 email: email

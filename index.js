@@ -29,6 +29,8 @@ async function run() {
         const usersCollection = client.db('resaleShop').collection('users');
         const bookingsCollection = client.db('resaleShop').collection('bookings');
         const paymentsCollection = client.db('resaleShop').collection('payments');
+        const wishlistsCollection = client.db('resaleShop').collection('wishlists');
+        const reporteditemsCollection = client.db('resaleShop').collection('reporteditems');
 
         // API for laptop category/brand
         app.get('/category', async (req, res) => {
@@ -79,7 +81,7 @@ async function run() {
 
             const result = await paymentsCollection.insertOne(payment);
 
-            //For booking update
+            // *For booking update*
             const bookingId = payment.bookingId;
             const filter = { _id: new ObjectId(bookingId) };
             const updatedBookingDoc = {
@@ -90,7 +92,7 @@ async function run() {
             }
             const updatedBookingResult = await bookingsCollection.updateOne(filter, updatedBookingDoc);
 
-            //For product/laptop update
+            // *For product/laptop update*
             const productId = payment.productId;
             const query = { _id: new ObjectId(productId) };
             const updatedProductDoc = {
@@ -310,6 +312,26 @@ async function run() {
 
             res.send(result);
 
+        });
+
+        // API for save wishlist product
+        app.post('/wishlists', async (req, res) => {
+            const laptopDetail = req.body;
+            // console.log(laptopDetail);
+
+            const result = await wishlistsCollection.insertOne(laptopDetail);
+
+            res.send(result);
+        });
+
+        // API for save reported product
+        app.post('/reporteditems', async (req, res) => {
+            const reportedItem = req.body;
+            // console.log(laptopDetail);
+
+            const result = await reporteditemsCollection.insertOne(reportedItem);
+
+            res.send(result);
         });
 
     }

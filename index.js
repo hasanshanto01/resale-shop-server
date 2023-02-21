@@ -340,6 +340,17 @@ async function run() {
             res.send(result);
         });
 
+        // API for getting reported product
+        app.get('/reporteditems', async (req, res) => {
+
+            const query = {};
+
+            const result = await reporteditemsCollection.find(query).toArray();
+
+            res.send(result);
+
+        });
+
         // API for save reported product
         app.post('/reporteditems', async (req, res) => {
             const reportedItem = req.body;
@@ -348,6 +359,21 @@ async function run() {
             const result = await reporteditemsCollection.insertOne(reportedItem);
 
             res.send(result);
+        });
+
+        // API for reported product delete
+        app.delete('/reporteditems/:id', async (req, res) => {
+            const id = req.params.id;
+            // console.log(id);
+
+            const query = {
+                _id: new ObjectId(id)
+            };
+
+            const result = await reporteditemsCollection.deleteOne(query);
+
+            res.send(result);
+
         });
 
     }

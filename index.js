@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { query } = require('express');
 require('dotenv').config();
 
 const stripe = require("stripe")(process.env.STRIPE_SK);
@@ -309,6 +310,21 @@ async function run() {
             };
 
             const result = await laptopsCollection.deleteOne(query);
+
+            res.send(result);
+
+        });
+
+        // API for getting wishlist product based on user
+        app.get('/wishlists', async (req, res) => {
+            const email = req.query.email;
+            console.log(email);
+
+            const query = {
+                email: email
+            };
+
+            const result = await wishlistsCollection.find(query).toArray();
 
             res.send(result);
 
